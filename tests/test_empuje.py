@@ -2,7 +2,8 @@ from typer.testing import CliRunner
 
 from empuje import __app_name__, __version__, cli
 
-runner  = CliRunner()
+runner = CliRunner()
+
 
 def test_version():
     result = runner.invoke(cli.app, ["--version"])
