@@ -1,12 +1,12 @@
+from pathlib import Path
 from typing import Optional
 
 import typer
 
-from empuje import __app_name__, __version__
-from pathlib import Path
 from empuje import ERRORS, __app_name__, __version__, config, database
 
 app = typer.Typer()
+
 
 @app.command()
 def init(
