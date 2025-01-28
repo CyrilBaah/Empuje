@@ -82,13 +82,13 @@ def add(
 ) -> None:
     """Add a new empuje with a DESCRIPTION."""
     empujer = get_empuje()
-    todo, error = empujer.add(description, priority)
+    empuje, error = empujer.add(description, priority)
     if error:
-        typer.secho(f'Adding to-do failed with "{ERRORS[error]}"', fg=typer.colors.RED)
+        typer.secho(f'Adding empuje failed with "{ERRORS[error]}"', fg=typer.colors.RED)
         raise typer.Exit(1)
     else:
         typer.secho(
-            f"""empuje: "{todo['Description']}" was added """
+            f"""empuje: "{empuje['Description']}" was added """
             f"""with priority: {priority}""",
             fg=typer.colors.GREEN,
         )
@@ -112,8 +112,8 @@ def list_all() -> None:
     headers = "".join(columns)
     typer.secho(headers, fg=typer.colors.BLUE, bold=True)
     typer.secho("-" * len(headers), fg=typer.colors.BLUE)
-    for id, todo in enumerate(empuje_list, 1):
-        desc, priority, done = todo.values()
+    for id in enumerate(empuje_list, 1):
+        desc, priority, done = empuje.values()
         typer.secho(
             f"{id}{(len(columns[0]) - len(str(id))) * ' '}"
             f"| ({priority}){(len(columns[1]) - len(str(priority)) - 4) * ' '}"
@@ -122,3 +122,88 @@ def list_all() -> None:
             fg=typer.colors.BLUE,
         )
     typer.secho("-" * len(headers) + "\n", fg=typer.colors.BLUE)
+
+
+@app.command(name="complete")
+def set_done(empuje_id: int = typer.Argument(...)) -> None:
+    """Complete empuje by setting is as done using empuje_id"""
+    empujer = get_empuje()
+    empuje, error = empujer.set_done(empuje_id)
+    if error:
+        typer.secho(
+            f'Completing empuje # "{empuje_id}" failed with "{ERRORS[error]}"',
+            fg=typer.colors.RED,
+        )
+        raise typer.Exit(1)
+    else:
+        typer.secho(
+            f"""empuje # {empuje_id}" {empuje['Description']}" completed! """,
+            fg=typer.colors.GREEN,
+        )
+
+
+@app.command()
+def remove(
+    empuje_id: int = typer.Argument(...),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        "-f",
+        help="Force deletion without confirmation.",
+    ),
+) -> None:
+    """Remove a empuje using its empuje_id"""
+    empujer = get_empuje()
+
+    def _remove():
+        empuje, error = empujer.remove(empuje_id)
+        if error:
+            typer.secho(
+                f'Removing empuje # {empuje} failed with "{ERRORS[error]}"',
+                fg=typer.colors.RED,
+            )
+            raise typer.Exit(1)
+        else:
+            typer.secho(
+                f"""empuje # {empuje}: '{empuje["Description"]}' was removed""",
+                fg=typer.colors.GREEN,
+            )
+
+    if force:
+        _remove()
+    else:
+        empuje_list = empujer.get_all_empuje()
+        try:
+            empuje = empuje_list[empuje_id - 1]
+        except IndexError:
+            typer.secho("Invalid Empuje_id", fg=typer.colors.RED)
+            raise typer.Exit(1)
+        delete = typer.confirm(f"Delete empuje # {empuje_id}: {empuje['Description']}?")
+        if delete:
+            _remove()
+        else:
+            typer.echo("Operation canceled")
+
+
+@app.command(name="clear")
+def remove_all(
+    force: bool = typer.Option(
+        ...,
+        prompt="Delete all empujes?",
+        help="Force deletion without confirmation.",
+    ),
+) -> None:
+    """Remove all empujes."""
+    empujer = get_empuje()
+    if force:
+        error = empujer.remove_all().error
+        if error:
+            typer.secho(
+                f'Removing empujes failed with "{ERRORS[error]}"',
+                fg=typer.colors.RED,
+            )
+            raise typer.Exit(1)
+        else:
+            typer.secho("All empujes were removed", fg=typer.colors.GREEN)
+    else:
+        typer.echo("Operation canceled")
