@@ -9,16 +9,16 @@ DEFAULT_DB_FILE_PATH = Path.home().joinpath("." + Path.home().stem + "_empuje.js
 
 
 def get_database_path(config_file: Path) -> Path:
-    """Return the current path to the empuje database"""
+    """Return the current path to the to-do database."""
     config_parser = configparser.ConfigParser()
     config_parser.read(config_file)
     return Path(config_parser["General"]["database"])
 
 
 def init_database(db_path: Path) -> int:
-    """Create the empuje database"""
+    """Create the to-do database."""
     try:
-        db_path.write_text("[]")
+        db_path.write_text("[]")  # Empty to-do list
         return SUCCESS
     except OSError:
         return DB_WRITE_ERROR
@@ -37,7 +37,7 @@ class DatabaseHandler:
         try:
             with self._db_path.open("r") as db:
                 try:
-                    return DBResponse(json.loads(db), SUCCESS)
+                    return DBResponse(json.load(db), SUCCESS)
                 except json.JSONDecodeError:
                     return DBResponse([], JSON_ERROR)
         except OSError:
@@ -47,6 +47,6 @@ class DatabaseHandler:
         try:
             with self._db_path.open("w") as db:
                 json.dump(empuje_list, db, indent=4)
-            return DBResponse([], DB_READ_ERROR)
+            return DBResponse(empuje_list, SUCCESS)
         except OSError:
             return DBResponse(empuje_list, DB_WRITE_ERROR)
