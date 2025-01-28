@@ -112,8 +112,8 @@ def list_all() -> None:
     headers = "".join(columns)
     typer.secho(headers, fg=typer.colors.BLUE, bold=True)
     typer.secho("-" * len(headers), fg=typer.colors.BLUE)
-    for id in enumerate(empuje_list, 1):
-        desc, priority, done = empuje.values()
+    for id, empuje_item in enumerate(empuje_list, 1):
+        desc, priority, done = empuje_item.values()
         typer.secho(
             f"{id}{(len(columns[0]) - len(str(id))) * ' '}"
             f"| ({priority}){(len(columns[1]) - len(str(priority)) - 4) * ' '}"
