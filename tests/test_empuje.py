@@ -1,7 +1,7 @@
 import json
 
 import pytest
-from typer.testing import CliRunner 
+from typer.testing import CliRunner
 
 from empuje import SUCCESS, __app_name__, __version__, cli, empuje
 
